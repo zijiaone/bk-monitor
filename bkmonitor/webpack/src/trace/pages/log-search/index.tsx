@@ -23,37 +23,20 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { computed, defineComponent, ref } from 'vue';
+import LogSearch from '@blueking/log-search/vue3';
+// import LogSearch from './components/vue3-light.es.js'
+import '@blueking/log-search/dist/vue3-light.css';
 
-import alarmShield from './modules/alarm-shield';
-import homeRoutes from './modules/home';
+import './index.scss';
 
-const router = createRouter({
-  history: createWebHashHistory(),
-  routes: [
-    ...homeRoutes.map(item => ({
-      ...item,
-      path: `${window.__BK_WEWEB_DATA__?.baseroute || '/'}${item.path}`.replace(/\/\//gim, '/')
-    })),
-    ...alarmShield.map(item => ({
-      ...item,
-      path: `${window.__BK_WEWEB_DATA__?.baseroute || '/'}${item.path}`.replace(/\/\//gim, '/')
-    })),
-    {
-      path: '/:pathMatch(.*)',
-      redirect: {
-        name: 'home'
-      }
-    },
-    {
-      path: '/log-search',
-      component: () => import(/* webpackChunkName: "inquire" */ '../pages/log-search/index.tsx')
-    }
-  ]
+export default defineComponent({
+  
+  render() {
+    return (
+      <div class="log-search-component">
+        <LogSearch></LogSearch>
+      </div>
+    );
+  }
 });
-console.dir('router: ', router);
-router.onError(e => {
-  console.error('router error: ', e);
-});
-
-export default router;

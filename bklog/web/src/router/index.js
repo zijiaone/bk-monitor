@@ -1022,6 +1022,11 @@ const routes = [
       title: '无权限页面',
     },
   },
+  {
+    path: '/log-search',
+    name: 'log-search',
+    component: () => import(/* webpackChunkName: 'logTraceDetail' */'@/views/log-search'),
+  },
 ];
 
 const router = new VueRouter({
