@@ -1,1 +1,1 @@
-console.log('verify-commit');
+console.log('verify-commit-------------------');
