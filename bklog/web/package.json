@@ -73,6 +73,7 @@
     "vue-eslint-parser": "^7.10.0",
     "husky": "^4.3.8",
     "lint-staged": "^15.2.0",
+    "picocolors": "^1.0.0",
     "simple-git-hooks": "^2.7.0",
     "nodemon": "^2.0.9",
     "vue-tsx-support": "^3.1.0"
