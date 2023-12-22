@@ -43,7 +43,6 @@ import { WebTracerProvider } from '@opentelemetry/web';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { XMLHttpRequestInstrumentation } from '@opentelemetry/instrumentation-xml-http-request';
 import { ZoneContextManager } from '@opentelemetry/context-zone';
-console.log('test pre-commit');
 const provider = new WebTracerProvider();
 provider.register({
   contextManager: new ZoneContextManager(),

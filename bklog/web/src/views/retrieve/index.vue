@@ -281,7 +281,7 @@ const DEFAULT_RETRIEVE_PARAMS = {
   size: 500,
   interval: 'auto', // 聚合周期
 };
-
+console.log('test pre-commit');
 export default {
   name: 'Retrieve',
   components: {
