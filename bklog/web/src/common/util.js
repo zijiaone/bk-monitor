@@ -987,3 +987,4 @@ export const flatObjTypeFiledKeys = (currentObject = {}, newFlatObj, previousKey
 };
 
 export const TABLE_LOG_FIELDS_SORT_REGULAR = /^[_]{1,2}|[_]{1,2}/g;
+console.log('test');
