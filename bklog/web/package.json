@@ -94,8 +94,8 @@
     "commit-msg": "node ./bklog/web/webpack/verify-commit.js $1"
   },
   "lint-staged": {
-    "src/**/*.{js,ts,tsx,vue}": [
-      "eslint --fix"
+    "src/**/*.(vue|ts|tsx)": [
+      "eslint --ext .js,.tsx,.ts,.vue --cache --fix"
     ],
     "src/**/*.(vue|scss|css|sass)": [
       "stylelint --fix"
