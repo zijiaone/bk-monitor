@@ -302,6 +302,10 @@ export class LineChart
       ? (dayjs() as any).add(-timeMatch[1], timeMatch[2]).fromNow().replace(/\s*/g, '')
       : val.replace('current', window.i18n.tc('当前'));
   }
+  // 图表tooltip 可用于继承组件重写该方法
+  handleSetTooltip() {
+    return {};
+  }
   /**
    * @description: 获取图表数据
    * @param {*}
@@ -434,7 +438,8 @@ export class LineChart
             markPoint: this.createMarkPointData(item, series),
             markLine: this.createMarkLine(index),
             markArea: this.createMarkArea(item, index),
-            z: 1
+            z: 1,
+            traceData: item.trace_data ?? ''
           })) as any
         );
         const boundarySeries = seriesResult.map(item => this.handleBoundaryList(item, series)).flat(Infinity);
@@ -454,7 +459,7 @@ export class LineChart
             };
           })
         }));
-        this.seriesList = seriesList;
+        this.seriesList = Object.freeze(seriesList) as any;
         // 1、echarts animation 配置会影响数量大时的图表性能 掉帧
         // 2、echarts animation配置为false时 对于有孤立点不连续的图表无法放大 并且 hover的点放大效果会潇洒 (貌似echarts bug)
         // 所以此处折中设置 在有孤立点情况下进行开启animation 连续的情况不开启
@@ -488,10 +493,11 @@ export class LineChart
           this.panel.options?.time_series?.echart_option || {},
           { arrayMerge: (_, newArr) => newArr }
         ) as EChartOption<EChartOption.Series>;
+        const isBar = this.panel.options?.time_series?.type === 'bar';
         this.options = Object.freeze(
           deepmerge(echartOptions, {
             animation: hasShowSymbol,
-            color: this.panel.options?.time_series?.type === 'bar' ? COLOR_LIST_BAR : COLOR_LIST,
+            color: isBar ? COLOR_LIST_BAR : COLOR_LIST,
             animationThreshold: 1,
             yAxis: {
               axisLabel: {
@@ -509,7 +515,12 @@ export class LineChart
               minInterval: 1,
               scale: this.height < 120 ? false : canScale,
               max: v => Math.max(v.max, +maxThreshold),
-              min: v => Math.min(v.min, +minThreshold)
+              min: v => {
+                let min = Math.min(v.min, +minThreshold);
+                // 柱状图y轴不能以最小值作为起始点
+                if (isBar) min = min <= 10 ? 0 : min - 10;
+                return min;
+              }
             },
             xAxis: {
               axisLabel: {
@@ -518,7 +529,8 @@ export class LineChart
               splitNumber: Math.ceil(this.width / 80),
               min: 'dataMin'
             },
-            series: seriesList
+            series: seriesList,
+            tooltip: this.handleSetTooltip()
           })
         );
         this.metrics = metrics || [];
@@ -828,6 +840,8 @@ export class LineChart
           if (hasNoBrother) {
             showSymbol = true;
           }
+          // profiling 趋势图 其中 Trace 数据需包含span列表
+          const traceData = item.traceData ? item.traceData[seriesItem[0]] : undefined;
           return {
             symbolSize: hasNoBrother ? 10 : 6,
             value: [seriesItem[0], seriesItem[1]],
@@ -836,7 +850,8 @@ export class LineChart
               enabled: true,
               shadowBlur: 0,
               opacity: 1
-            }
+            },
+            traceData
           } as any;
         }
         return seriesItem;
@@ -844,7 +859,12 @@ export class LineChart
 
       legendItem.avg = +(+legendItem.total / (hasValueLength || 1)).toFixed(2);
       legendItem.total = Number(legendItem.total).toFixed(2);
-
+      // 获取y轴上可设置的最小的精确度
+      const precision = this.handleGetMinPrecision(
+        item.data.filter((set: any) => typeof set[1] === 'number').map((set: any[]) => set[1]),
+        unitFormatter,
+        item.unit
+      );
       if (item.name) {
         Object.keys(legendItem).forEach(key => {
           if (['min', 'max', 'avg', 'total'].includes(key)) {
@@ -856,12 +876,6 @@ export class LineChart
         });
         legendData.push(legendItem);
       }
-      // 获取y轴上可设置的最小的精确度
-      const precision = this.handleGetMinPrecision(
-        item.data.filter((set: any) => typeof set[1] === 'number').map((set: any[]) => set[1]),
-        unitFormatter,
-        item.unit
-      );
       return {
         ...item,
         color,
